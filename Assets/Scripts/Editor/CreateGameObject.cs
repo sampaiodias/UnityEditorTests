@@ -9,7 +9,7 @@ public class CreateGameObject : EditorWindow {
     bool specialMaterial;
     Color color;
 
-    string prefabPath = "Prefabs/CapsulePrefabExample.prefab";
+    string prefabPath = "CapsulePrefabExample";
 
     string myName = "NewGameObject";
     string shader = "Standard";
@@ -27,13 +27,13 @@ public class CreateGameObject : EditorWindow {
         myName = EditorGUILayout.TextField("Object Name ", myName);
         GUILayout.Space(10);
 
-        specialMaterial = EditorGUILayout.BeginToggleGroup("Change Material?", specialMaterial);
+        specialMaterial = EditorGUILayout.BeginToggleGroup("New Material?", specialMaterial);
         shader = EditorGUILayout.TextField("Shader Name ", shader);
         color = EditorGUILayout.ColorField("Object Color ", color);
         EditorGUILayout.EndToggleGroup();
         GUILayout.Space(10);
 
-        addScript = EditorGUILayout.BeginToggleGroup("Add SimpleScript?", addScript);
+        addScript = EditorGUILayout.BeginToggleGroup("Add SimpleScript.cs?", addScript);
         value = EditorGUILayout.IntSlider("Value ", value, 0, 10);
         EditorGUILayout.EndToggleGroup();
 
@@ -75,7 +75,8 @@ public class CreateGameObject : EditorWindow {
 
         GUILayout.Space(30);
         GUILayout.Label("Instantiate From Prefab", EditorStyles.boldLabel);
-        prefabPath = EditorGUILayout.TextField("Prefab Path ", prefabPath);
+        GUILayout.Label("Press the button below with the prefab selected", EditorStyles.label);
+        //prefabPath = EditorGUILayout.TextField("Prefab Path ", prefabPath);
         GUILayout.Space(10);
         if (GUILayout.Button("Prefab"))
         {
@@ -88,43 +89,45 @@ public class CreateGameObject : EditorWindow {
 
     void Create(string type)
     {
-        GameObject obj;
+        GameObject newObject;
+
         switch (type)
         {
             default:
-                obj = new GameObject();
+                newObject = new GameObject();
                 break;
             case ("Cube"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 break;
             case ("Capsule"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 break;
             case ("Sphere"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 break;
             case ("Cylinder"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 break;
             case ("Plane"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 break;
             case ("Quad"):
-                obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                newObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 break;
             case ("Prefab"):
-                GameObject prefab = (GameObject)AssetDatabase.LoadAssetAtPath(prefabPath, typeof(GameObject));
-                //obj = (GameObject)Instantiate(prefab);
-                obj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                //Object prefab = (GameObject)AssetDatabase.LoadAssetAtPath("Resources/CapsulePrefabExample", typeof(GameObject));
+                //newObject = (GameObject)Instantiate(Resources.Load(prefabPath));
+
+                newObject = (GameObject)PrefabUtility.InstantiatePrefab(Selection.activeObject as GameObject);
                 break;
         }
 
-        obj.name = myName;
+        newObject.name = myName;
 
         if (addScript)
         {
-            obj.AddComponent<SimpleScript>();
-            SimpleScript script = obj.GetComponent<SimpleScript>();
+            newObject.AddComponent<SimpleScript>();
+            SimpleScript script = newObject.GetComponent<SimpleScript>();
             script.myValue = value;
         }
 
@@ -133,12 +136,16 @@ public class CreateGameObject : EditorWindow {
             Material material = new Material(Shader.Find(shader));
             AssetDatabase.CreateAsset(material, "Assets/Materials/" + myName + ".mat");          
 
-            Renderer renderer = obj.GetComponent<Renderer>();
+            Renderer renderer = newObject.GetComponent<Renderer>();
             if (renderer != null)
             {
                 renderer.material = material;
                 renderer.sharedMaterial.color = color;
             }
-        }        
+        }
+
+        Selection.activeObject = newObject;
+
+        Debug.Log("Object created!");
     }
 }
